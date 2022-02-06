@@ -9,7 +9,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>com.kolobkevic.chat</groupId>
     <artifactId>chat-server</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.kolobkevic</groupId>
+            <artifactId>chat-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>

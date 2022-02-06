@@ -1,0 +1,5 @@
+ru\kolobkevic\chat\chat_client\MainChatController.class
+ru\kolobkevic\chat\chat_client\network\MessageProcessor.class
+ru\kolobkevic\chat\chat_client\ChatApplication.class
+ru\kolobkevic\chat\chat_client\Launcher.class
+ru\kolobkevic\chat\chat_client\network\NetworkService.class
