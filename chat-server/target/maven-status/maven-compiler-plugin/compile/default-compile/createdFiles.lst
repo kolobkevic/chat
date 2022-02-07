@@ -1,0 +1,7 @@
+ru\kolobkevic\chat\chat_server\entity\User.class
+ru\kolobkevic\chat\chat_server\App.class
+ru\kolobkevic\chat\chat_server\auth\InMemoryAuthService.class
+ru\kolobkevic\chat\chat_server\error\WrongCredentialsExceptions.class
+ru\kolobkevic\chat\chat_server\server\UserHandler.class
+ru\kolobkevic\chat\chat_server\auth\AuthService.class
+ru\kolobkevic\chat\chat_server\server\Server.class

@@ -13,10 +13,12 @@ public class ChatApplication extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/mainChatWindow.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("/mainChatWindow.fxml"));
         Parent parent =loader.load();
         Scene scene =new Scene(parent);
         stage.setScene(scene);
+        stage.setTitle("Chat");
         stage.show();
     }
 }
