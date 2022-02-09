@@ -29,7 +29,8 @@ public class NetworkService {
                     messageProcessor.processMessage(message);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Disconnected");
+                //e.printStackTrace();
             }
         });
         thread.setDaemon(true);
@@ -52,6 +53,8 @@ public class NetworkService {
         try {
             if (socket != null && !socket.isClosed()) {
                 socket.close();
+                in.close();
+                out.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
