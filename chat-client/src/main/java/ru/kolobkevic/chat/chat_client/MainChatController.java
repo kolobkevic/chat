@@ -120,6 +120,10 @@ public class MainChatController implements Initializable, MessageProcessor {
                 changePasswordPanel.setVisible(false);
                 mainChatPanel.setVisible(true);
                 break;
+            case "/time_out":
+                showError("Disconnected");
+                networkService.close();
+                break;
             default:
                 mainChatArea.appendText(splitMessage[0] + System.lineSeparator());
                 break;

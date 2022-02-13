@@ -95,36 +95,55 @@ public class UserHandler {
 
     private void authorize() {
         System.out.println("Authorizing");
+        long start=System.currentTimeMillis();
+        long time = start + 5 * 1000;
         while (true) {
             try {
-                var message = in.readUTF();
-                if (message.startsWith("/auth")) {
-                    var parsedAuthMessage = message.split(Server.REGEX);
-                    var response = "";
-                    String nickname = null;
+                if (System.currentTimeMillis() > time) {
+                    send("/time_out" + Server.REGEX);
+                    System.out.println("Connection was broken");
                     try {
-                        nickname = server.getAuthService().authorizeUserByLoginAndPassword(parsedAuthMessage[1], parsedAuthMessage[2]);
-                    } catch (WrongCredentialsExceptions e) {
-                        response = "/error" + Server.REGEX + e.getMessage();
-                        System.out.println("Wrong credentials, nick " + parsedAuthMessage[1]);
+                        close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                    break;
+                } else {
+                    var message = in.readUTF();
+                    if (message.startsWith("/auth")) {
+                        var parsedAuthMessage = message.split(Server.REGEX);
+                        var response = "";
+                        String nickname = null;
+                        try {
+                            nickname = server.getAuthService().authorizeUserByLoginAndPassword(parsedAuthMessage[1], parsedAuthMessage[2]);
+                        } catch (WrongCredentialsExceptions e) {
+                            response = "/error" + Server.REGEX + e.getMessage();
+                            System.out.println("Wrong credentials, nick " + parsedAuthMessage[1]);
+                        }
 
-                    if (server.isNicknameBusy(nickname)) {
-                        response = "/error" + Server.REGEX + "This user is already connected";
-                        System.out.println("Nickname is busy" + nickname);
-                    }
-                    if (!response.isEmpty()) {
-                        send(response);
-                    } else {
-                        this.user = nickname;
-                        send("/auth_ok" + Server.REGEX + nickname);
-                        server.addAuthorizedUserToList(this);
-                        break;
+                        if (server.isNicknameBusy(nickname)) {
+                            response = "/error" + Server.REGEX + "This user is already connected";
+                            System.out.println("Nickname is busy" + nickname);
+                        }
+                        if (!response.isEmpty()) {
+                            send(response);
+                        } else {
+                            this.user = nickname;
+                            send("/auth_ok" + Server.REGEX + nickname);
+                            server.addAuthorizedUserToList(this);
+                            break;
+                        }
                     }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void close() throws IOException {
+        this.socket.close();
+        this.in.close();
+        this.out.close();
     }
 }
