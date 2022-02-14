@@ -7,6 +7,7 @@ public class PropertyReader {
     private static PropertyReader instance;
     private String host;
     private int port;
+    private long authTimeout;
 
     private PropertyReader() {
         getPropValues();
@@ -20,16 +21,13 @@ public class PropertyReader {
     }
 
     public void getPropValues() {
-
         var propFileName = "app.properties";
-
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(propFileName)) {
             var properties = new Properties();
             properties.load(inputStream);
-
             host = properties.getProperty("host");
             port = Integer.parseInt(properties.getProperty("port"));
-
+            authTimeout = Long.parseLong(properties.getProperty("auth.timeout"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,5 +39,9 @@ public class PropertyReader {
 
     public int getPort() {
         return port;
+    }
+
+    public long getAuthTimeout() {
+        return authTimeout;
     }
 }
