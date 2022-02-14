@@ -30,10 +30,8 @@ public class NetworkService {
                 }
             } catch (IOException e) {
                 System.out.println("Disconnected");
-                //e.printStackTrace();
             }
         });
-        thread.setDaemon(true);
         thread.start();
     }
 
