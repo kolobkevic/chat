@@ -16,7 +16,8 @@ public class UserHandler {
     private DataInputStream in;
     private DataOutputStream out;
     private Thread handlerThread;
-    private String user;
+    private String user_nickname;
+    private String user_login;
     private final long authTimeout;
 
     public UserHandler(Socket socket, Server server) {
@@ -27,7 +28,7 @@ public class UserHandler {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            System.out.println("Connection is broken with user " + user);
+            System.out.println("Connection is broken with user " + user_nickname);
         }
     }
 
@@ -39,7 +40,7 @@ public class UserHandler {
                     var message = in.readUTF();
                     handleMessage(message);
                 } catch (IOException e) {
-                    System.out.println("Connection is broken with user " + user);
+                    System.out.println("Connection is broken with user " + user_nickname);
                     server.removeAuthorizedUserToList(this);
                 }
             }
@@ -52,20 +53,20 @@ public class UserHandler {
         try {
             switch (splitMessage[0]) {
                 case "/w":
-                    server.privateMessage(this.user, splitMessage[1], splitMessage[2], this);
+                    server.privateMessage(this.user_nickname, splitMessage[1], splitMessage[2], this);
                     break;
                 case "/broadcast":
-                    server.broadcastMessage(user, splitMessage[1]);
+                    server.broadcastMessage(user_nickname, splitMessage[1]);
                     break;
                 case "/change_nick":
-                    String nick = server.getAuthService().changeNickname(this.user, splitMessage[1]);
+                    String nick = server.getAuthService().changeNickname(this.user_login, splitMessage[1]);
                     server.removeAuthorizedUserToList(this);
-                    this.user = nick;
+                    this.user_nickname = nick;
                     server.addAuthorizedUserToList(this);
                     send("/change_nick_ok");
                     break;
                 case "/change_pass":
-                    server.getAuthService().changePassword(this.user, splitMessage[1], splitMessage[2]);
+                    server.getAuthService().changePassword(this.user_nickname, splitMessage[1], splitMessage[2]);
                     send("/change_pass_ok");
                     break;
                 case "/remove":
@@ -91,7 +92,7 @@ public class UserHandler {
     }
 
     public String getUserNickname() {
-        return this.user;
+        return this.user_nickname;
     }
 
     public Thread getHandlerThread() {
@@ -105,7 +106,7 @@ public class UserHandler {
             @Override
             public void run() {
                 try {
-                    if (user == null) {
+                    if (user_nickname == null) {
                         send("/time_out" + Server.REGEX + "Authentication timeout!");
                         Thread.sleep(50);
                         close();
@@ -137,7 +138,8 @@ public class UserHandler {
                     if (!response.isEmpty()) {
                         send(response);
                     } else {
-                        this.user = nickname;
+                        this.user_nickname = nickname;
+                        this.user_login=parsedAuthMessage[1];
                         send("/auth_ok" + Server.REGEX + nickname);
                         server.addAuthorizedUserToList(this);
                         break;

@@ -3,21 +3,31 @@ package ru.kolobkevic.chat.chat_server.auth;
 import ru.kolobkevic.chat.chat_server.entity.User;
 import ru.kolobkevic.chat.chat_server.error.WrongCredentialsExceptions;
 
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryAuthService implements AuthService {
     private List<User> usersList;
+    private Connection connection;
+    private Statement statement;
+    private PreparedStatement ps_ChangeNickname;
+
+    private final String DB_CONNECTION_STRING = "jdbc:sqlite:chat-server/db/UserListDB.db";
+    private final String DB_CHANGE_NICKNAME_STRING = "UPDATE userList SET nickname = ? WHERE login = ?;";
+
 
     public InMemoryAuthService() {
         this.usersList = new ArrayList<>();
-        usersList.addAll(List.of(
-                new User("login1", "password", "secret", "nickname1"),
-                new User("login2", "password", "secret", "nickname2"),
-                new User("login3", "password", "secret", "nickname3"),
-                new User("login4", "password", "secret", "nickname4"),
-                new User("login5", "password", "secret", "nickname5")
-        ));
+        try {
+            connect();
+            readFromDB();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+//        finally {
+//            disconnect();
+//        }
     }
 
     @Override
@@ -42,6 +52,14 @@ public class InMemoryAuthService implements AuthService {
 
     @Override
     public String changeNickname(String login, String newNickname) {
+        try {
+            ps_ChangeNickname.setString(1, newNickname);
+            ps_ChangeNickname.setString(2, login);
+            ps_ChangeNickname.executeUpdate();
+            return newNickname;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
@@ -63,5 +81,45 @@ public class InMemoryAuthService implements AuthService {
     @Override
     public void resetPassword(String login, String newPassword, String secretPhrase) {
 
+    }
+
+    private void connect() throws SQLException {
+        connection = DriverManager.getConnection(DB_CONNECTION_STRING);
+        statement = connection.createStatement();
+        ps_ChangeNickname = connection.prepareStatement(DB_CHANGE_NICKNAME_STRING);
+    }
+
+    private void readFromDB() throws SQLException {
+        try (var resultSet = statement.executeQuery("SELECT * FROM userList;")) {
+            while (resultSet.next()) {
+                usersList.addAll(List.of(
+                        new User(resultSet.getString("login"), resultSet.getString("password"),
+                                resultSet.getString("secret"), resultSet.getString("nickname"))));
+            }
+        }
+    }
+
+    private void disconnect() {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (ps_ChangeNickname != null) {
+            try {
+                ps_ChangeNickname.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
