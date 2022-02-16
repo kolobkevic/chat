@@ -63,7 +63,7 @@ public class UserHandler {
                     server.removeAuthorizedUserToList(this);
                     this.user_nickname = nick;
                     server.addAuthorizedUserToList(this);
-                    send("/change_nick_ok");
+                    send("/change_nick_ok" + Server.REGEX + nick);
                     break;
                 case "/change_pass":
                     server.getAuthService().changePassword(this.user_nickname, splitMessage[1], splitMessage[2]);
