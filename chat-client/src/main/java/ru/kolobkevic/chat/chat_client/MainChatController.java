@@ -106,19 +106,17 @@ public class MainChatController implements Initializable, MessageProcessor {
                 System.out.println("Got error " + splitMessage[1]);
                 break;
             case "/list":
-                var contacts = new ArrayList<String>();
-                contacts.add("ALL");
-                for (int i = 1; i < splitMessage.length; i++) {
-                    if (!splitMessage[i].equals(nickname)) {
-                        contacts.add(splitMessage[i]);
-                    }
-                }
-                contactsList.setItems(FXCollections.observableList(contacts));
-                contactsList.getSelectionModel().selectFirst();
+                refreshContactList(splitMessage);
                 break;
             case "/change_pass_ok":
                 changePasswordPanel.setVisible(false);
                 mainChatPanel.setVisible(true);
+                break;
+            case "/change_nick_ok":
+                changeNickPanel.setVisible(false);
+                mainChatPanel.setVisible(true);
+                this.nickname=splitMessage[1];
+                refreshContactList(splitMessage);
                 break;
             case "/time_out":
                 showError("Disconnected");
@@ -181,5 +179,17 @@ public class MainChatController implements Initializable, MessageProcessor {
     public void showChangePass(ActionEvent actionEvent) {
         mainChatPanel.setVisible(false);
         changePasswordPanel.setVisible(true);
+    }
+
+    public void refreshContactList( String[] msg) {
+        var contacts = new ArrayList<String>();
+        contacts.add("ALL");
+        for (int i = 1; i < msg.length; i++) {
+            if (!msg[i].equals(nickname)) {
+                contacts.add(msg[i]);
+            }
+        }
+        contactsList.setItems(FXCollections.observableList(contacts));
+        contactsList.getSelectionModel().selectFirst();
     }
 }

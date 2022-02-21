@@ -2,22 +2,20 @@ package ru.kolobkevic.chat.chat_server.auth;
 
 import ru.kolobkevic.chat.chat_server.entity.User;
 import ru.kolobkevic.chat.chat_server.error.WrongCredentialsExceptions;
+import ru.kolobkevic.chat.chat_server.server.DataBaseHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class InMemoryAuthService implements AuthService {
     private List<User> usersList;
+    private DataBaseHandler dataBaseHandler;
+
 
     public InMemoryAuthService() {
         this.usersList = new ArrayList<>();
-        usersList.addAll(List.of(
-                new User("login1", "password", "secret", "nickname1"),
-                new User("login2", "password", "secret", "nickname2"),
-                new User("login3", "password", "secret", "nickname3"),
-                new User("login4", "password", "secret", "nickname4"),
-                new User("login5", "password", "secret", "nickname5")
-        ));
+        dataBaseHandler = new DataBaseHandler();
+        usersList.addAll(dataBaseHandler.getListFromDB());
     }
 
     @Override
@@ -28,6 +26,7 @@ public class InMemoryAuthService implements AuthService {
     @Override
     public void stop() {
         System.out.println("Auth service stopped");
+        dataBaseHandler.disconnect();
     }
 
     @Override
@@ -42,7 +41,7 @@ public class InMemoryAuthService implements AuthService {
 
     @Override
     public String changeNickname(String login, String newNickname) {
-        return null;
+        return dataBaseHandler.changeNickname(login, newNickname);
     }
 
     @Override
