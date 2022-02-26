@@ -2,10 +2,9 @@ package ru.kolobkevic.chat.chat_client.network;
 
 import ru.kolobkevic.chat.props.PropertyReader;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class NetworkService {
     private final String host;
@@ -64,5 +63,29 @@ public class NetworkService {
         this.in = new DataInputStream(socket.getInputStream());
         this.out = new DataOutputStream(socket.getOutputStream());
         readMessages();
+    }
+
+    public void writeToFile(String username, String outputString) {
+        String filename = username + ".txt";
+        try (DataOutputStream outFile = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename, true)))) {
+            outFile.writeUTF(outputString);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<String> readFromFile(String username) {
+        String filename = username + ".txt";
+        ArrayList<String> readMessagesList = new ArrayList<>();
+        try (DataInputStream inputFile = new DataInputStream(new BufferedInputStream(new FileInputStream(filename)))) {
+            while (inputFile.available() > 0) {
+                readMessagesList.add(inputFile.readUTF());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            readMessagesList.add("");
+        }
+        return readMessagesList;
     }
 }

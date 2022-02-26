@@ -81,6 +81,7 @@ public class MainChatController implements Initializable, MessageProcessor {
             networkService.sendMessage("/broadcast" + REGEX + message);
         }
         inputField.clear();
+        inputField.requestFocus();
     }
 
     @Override
@@ -100,6 +101,9 @@ public class MainChatController implements Initializable, MessageProcessor {
                 this.nickname = splitMessage[1];
                 loginPanel.setVisible(false);
                 mainChatPanel.setVisible(true);
+                for (String s : networkService.readFromFile(this.nickname)) {
+                    mainChatArea.appendText(s);
+                }
                 break;
             case "/error":
                 showError(splitMessage[1]);
@@ -115,7 +119,7 @@ public class MainChatController implements Initializable, MessageProcessor {
             case "/change_nick_ok":
                 changeNickPanel.setVisible(false);
                 mainChatPanel.setVisible(true);
-                this.nickname=splitMessage[1];
+                this.nickname = splitMessage[1];
                 refreshContactList(splitMessage);
                 break;
             case "/time_out":
@@ -124,6 +128,7 @@ public class MainChatController implements Initializable, MessageProcessor {
                 break;
             default:
                 mainChatArea.appendText(splitMessage[0] + System.lineSeparator());
+                networkService.writeToFile(this.nickname, splitMessage[0] + System.lineSeparator());
                 break;
         }
     }
@@ -181,7 +186,7 @@ public class MainChatController implements Initializable, MessageProcessor {
         changePasswordPanel.setVisible(true);
     }
 
-    public void refreshContactList( String[] msg) {
+    public void refreshContactList(String[] msg) {
         var contacts = new ArrayList<String>();
         contacts.add("ALL");
         for (int i = 1; i < msg.length; i++) {
