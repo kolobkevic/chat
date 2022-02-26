@@ -9,6 +9,7 @@ import java.util.ArrayList;
 public class NetworkService {
     private final String host;
     private final int port;
+    private final int HISTORY_SIZE = 5;
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
@@ -80,6 +81,9 @@ public class NetworkService {
         try (DataInputStream inputFile = new DataInputStream(new BufferedInputStream(new FileInputStream(filename)))) {
             while (inputFile.available() > 0) {
                 readMessagesList.add(inputFile.readUTF());
+            }
+            if (readMessagesList.size() > HISTORY_SIZE) {
+                readMessagesList = new ArrayList<>(readMessagesList.subList(0, HISTORY_SIZE));
             }
         } catch (IOException e) {
             e.printStackTrace();

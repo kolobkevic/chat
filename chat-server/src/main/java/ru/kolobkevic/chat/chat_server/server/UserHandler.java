@@ -15,7 +15,6 @@ public class UserHandler {
     private Socket socket;
     private DataInputStream in;
     private DataOutputStream out;
-    private Thread handlerThread;
     private String user_nickname;
     private String user_login;
     private final long authTimeout;
@@ -33,7 +32,7 @@ public class UserHandler {
     }
 
     public void handle() {
-        handlerThread = new Thread(() -> {
+        server.getExecutorService().execute(() -> {
             authorize();
             while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
                 try {
@@ -45,7 +44,6 @@ public class UserHandler {
                 }
             }
         });
-        handlerThread.start();
     }
 
     private void handleMessage(String message) {
@@ -93,10 +91,6 @@ public class UserHandler {
 
     public String getUserNickname() {
         return this.user_nickname;
-    }
-
-    public Thread getHandlerThread() {
-        return handlerThread;
     }
 
     private void authorize() {
