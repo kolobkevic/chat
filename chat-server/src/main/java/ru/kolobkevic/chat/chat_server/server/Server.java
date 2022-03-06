@@ -1,5 +1,7 @@
 package ru.kolobkevic.chat.chat_server.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.kolobkevic.chat.props.PropertyReader;
 import ru.kolobkevic.chat.chat_server.auth.AuthService;
 
@@ -16,6 +18,7 @@ public class Server {
     private final List<UserHandler> userHandlerList;
     private final AuthService authService;
     private final ExecutorService executorService;
+    private static final Logger log = LogManager.getLogger();
 
     public Server(AuthService authService) {
         port = PropertyReader.getInstance().getPort();
@@ -34,16 +37,16 @@ public class Server {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("Server started");
+            log.info("Server started");
             while (true) {
-                System.out.println("Waiting for connections");
+                log.info("Waiting for connections");
                 var socket = serverSocket.accept();
-                System.out.println("Client connected");
+                log.info("Client connected");
                 UserHandler userHandler = new UserHandler(socket, this);
                 userHandler.handle();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.throwing(e);
         } finally {
             authService.stop();
             shutdown();
