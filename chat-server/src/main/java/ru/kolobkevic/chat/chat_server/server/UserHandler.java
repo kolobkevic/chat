@@ -1,5 +1,7 @@
 package ru.kolobkevic.chat.chat_server.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ru.kolobkevic.chat.chat_server.error.WrongCredentialsExceptions;
 import ru.kolobkevic.chat.props.PropertyReader;
 
@@ -18,6 +20,7 @@ public class UserHandler {
     private String user_nickname;
     private String user_login;
     private final long authTimeout;
+    private static final Logger log = LogManager.getLogger();
 
     public UserHandler(Socket socket, Server server) {
         authTimeout = PropertyReader.getInstance().getAuthTimeout();
@@ -27,7 +30,8 @@ public class UserHandler {
             this.in = new DataInputStream(socket.getInputStream());
             this.out = new DataOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-            System.out.println("Connection is broken with user " + user_nickname);
+            log.warn("Connection is broken with user " + user_nickname);
+            //System.out.println("Connection is broken with user " + user_nickname);
         }
     }
 
@@ -37,9 +41,11 @@ public class UserHandler {
             while (!Thread.currentThread().isInterrupted() && !socket.isClosed()) {
                 try {
                     var message = in.readUTF();
+                    log.info("Message received from " + user_nickname);
                     handleMessage(message);
                 } catch (IOException e) {
-                    System.out.println("Connection is broken with user " + user_nickname);
+                    log.warn("Connection is broken with user " + user_nickname);
+                    //System.out.println("Connection is broken with user " + user_nickname);
                     server.removeAuthorizedUserToList(this);
                 }
             }
@@ -85,7 +91,8 @@ public class UserHandler {
         try {
             out.writeUTF(message);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.throwing(e);
+            //e.printStackTrace();
         }
     }
 
@@ -94,7 +101,8 @@ public class UserHandler {
     }
 
     private void authorize() {
-        System.out.println("Authorizing");
+        log.info("Authorizing");
+        //System.out.println("Authorizing");
         var timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override
@@ -104,10 +112,12 @@ public class UserHandler {
                         send("/time_out" + Server.REGEX + "Authentication timeout!");
                         Thread.sleep(50);
                         close();
-                        System.out.println("Connection with client closed");
+                        log.warn("Connection with client closed");
+                        //System.out.println("Connection with client closed");
                     }
                 } catch (InterruptedException | IOException e) {
-                    e.printStackTrace();
+                    log.throwing(e);
+                    //e.printStackTrace();
                 }
             }
         }, authTimeout);
@@ -122,12 +132,14 @@ public class UserHandler {
                         nickname = server.getAuthService().authorizeUserByLoginAndPassword(parsedAuthMessage[1], parsedAuthMessage[2]);
                     } catch (WrongCredentialsExceptions e) {
                         response = "/error" + Server.REGEX + e.getMessage();
-                        System.out.println("Wrong credentials, nick " + parsedAuthMessage[1]);
+                        log.warn("Wrong credentials, nick " + parsedAuthMessage[1]);
+                        //System.out.println("Wrong credentials, nick " + parsedAuthMessage[1]);
                     }
 
                     if (server.isNicknameBusy(nickname)) {
                         response = "/error" + Server.REGEX + "This user is already connected";
-                        System.out.println("Nickname is busy" + nickname);
+                        log.warn("Nickname is busy" + nickname);
+                        //System.out.println("Nickname is busy" + nickname);
                     }
                     if (!response.isEmpty()) {
                         send(response);
@@ -141,7 +153,8 @@ public class UserHandler {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.throwing(e);
+            //e.printStackTrace();
         }
     }
 
